@@ -1,0 +1,157 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<Component xmlns="http://www.red5studios.com/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.red5studios.com/ ../../../schemas/component.xsd">
+	<Info
+		title="Salvager"
+		author="Thehink"
+		description="Salvager"
+		url=""
+		uiVersion="1000"
+	/>
+
+	<Events>
+		<Event name="ON_COMPONENT_LOAD"					bind="OnUIEvent"/>
+		<Event name="ON_EXIT_GAME"						bind="OnUIEvent"/>
+		<Event name="ON_PLAYER_READY"					bind="OnUIEvent" />
+		<Event name="ON_STREAM_PROGRESS"				bind="OnUIEvent" />
+		<Event name="ON_SALVAGE_RESPONSE"				bind="OnUIEvent" />
+		<Event name="ON_RESOURCES_CHANGED"		    	bind="OnUIEvent" />
+		<Event name="ON_RESOURCE_ITEM_CHANGED"			bind="OnUIEvent" />
+		<Event name="ON_INVENTORY_ITEM_CHANGED"			bind="OnUIEvent" />
+		<Event name="ON_EXIT_ZONE"						bind="OnUIEvent" />
+		<Event name="ON_ENTER_ZONE"						bind="OnUIEvent" />
+	</Events>
+
+	<Textures>
+	</Textures>
+	
+	<Styles>
+		<StyleSheet name="BlueBackDrop" parent="PanelSubBackDrop">
+			alpha:0.7;
+			tint:#112233;
+		</StyleSheet>
+		
+		<StyleSheet name="YellowBackDrop" parent="PanelSubBackDrop">
+			alpha:0.7;
+			tint:#299a0b;
+		</StyleSheet>
+		
+		<StyleSheet name="SolidBackDrop" parent="PanelSubBackDrop">  
+			alpha:1;
+			tint:#000000;
+			eatsmice:false;
+		</StyleSheet>   
+		
+		<StyleSheet name="Backplate">  
+			texture:colors;
+			region:black;
+			shadow:0.4;
+			alpha:0.9;
+		</StyleSheet>  
+		<StyleSheet name="PanelTitle">  
+			halign:center;
+			valign:center;
+			shadow:0;
+			color:PanelTitle
+		</StyleSheet>  
+	</Styles>
+
+	<BluePrints>
+		<BluePrint name="InventoryCategory" instantiable="true" dimensions="width:100%; height:30; right:100%;">
+			<FocusBox name="categoryBtn" dimensions="right:100%; width:100%; height:100%;" class="ui_button">
+				<Border name="bg" class="SmallBorders" dimensions="dock:fill" style="alpha:0.9; padding:5; tint:#111111; shadow:0.1"/>
+				<Text name="title" key="{Category}" dimensions="dock:fill" style="font:Narrow_11; halign:center; valign:center; shadow:0; color:#00AAFF;" />
+			</FocusBox>
+		</BluePrint>
+		<BluePrint name="InventoryRow" instantiable="true" dimensions="width:100%; height:22;">
+			<Group name="row" dimensions="width:100%; height:20;" style="cursor:sys_hand">
+					<StillArt name="prestige_progress" dimensions="height:100%; width: 100%; left:0" style="texture:colors; region:white; tint:#299a0b; alpha:0.10; padding:5; visible:false" />
+					<Border name="bg" dimensions="dock:fill" class="BlueBackDrop"  style="alpha:0.0; padding:5;" />
+					<Text name="prestige" dimensions="left:0; width:50; height:20;" style="font:Demi_11; halign:left; valign:center; shadow:1; color:#00b7ea" />
+					<Text name="title" key="{My Listings}" dimensions="left:20; width:100%-50; height:20;" style="font:Narrow_11; clip:true; halign:left; valign:center; shadow:1; color:#00AA00" />
+					<Text name="quantity" key="{Quantity}" dimensions="left:100%-50; width:50; height:20;" style="font:Narrow_11; halign:right; valign:center; shadow:1; color:#AAAAAA" />
+				</Group>
+		</BluePrint>
+		<BluePrint name="RewardBox" instantiable="true" dimensions="width:100%; height:30; right:100%;">
+			<FocusBox name="ItemBox" dimensions="right:100%; width:100%; height:100%;">
+				<Border name="bg" dimensions="left:1; right:100%-1; top:1; bottom:100%-1" class="PanelSubBackDrop" style="padding:3; tint:#030C03; shadow:1; alpha:0.2;"/>
+				<WebImage name="icon" dimensions="center-y:50%; center-x:50%; width:100%-5; height:100%-5;" style="fixed-bounds:true; valign:center; halign:center; shadow:0.3;"/>
+				<Text name="quantity" key="{Quantity}" dimensions="width:100%; height:100%;" style="font:Demi_11; halign:right; valign:bottom; color:#009DFF; shadow:1.0;" />
+			</FocusBox>
+		</BluePrint>
+		<BluePrint name="Filter" instantiable="true" dimensions="left:0; right:100%; height:20; top:5">
+			<Group name="checkbox" dimensions="left:5; width:20; height:20; top:5"/>
+			<Text name="label" dimensions="top:5; left:25; right:100%; height:100%;" style="font:Narrow_11; halign:left; valign:top; wrap:true; clip:true"/>
+		</BluePrint>
+	</BluePrints>
+
+	<Frames>
+		<PanelFrame name="Main" dimensions="center-x:50%; center-y:50%; height:70%; width:990"  permanent="true" visible="false" depth="2">
+			<Children>
+				<Group name="foster" dimensions="left:5; right:100%-5; top:5; bottom:100%-5" style="visible:false"/>
+				<Border dimensions="top:0; bottom:38; left:0; right:100%" class="SmallBorders" style="alpha:0.9; padding:5; tint:#000000; shadow:0.5"/>
+
+				<FocusBox id="closeButton" dimensions="right:100%-8; top:6; width:26; height:26;" style="cursor:sys_hand">
+					<Border class="SmallBorders" dimensions="dock:fill" style="alpha:0.5; padding:5"/>
+					<StillArt name="X" dimensions="center-x:50%; center-y:50%; width:100%-10; height:100%-10" style="texture:Window; region:X; tint:#B82F06; cursor:sys_hand"/>
+				</FocusBox>
+				
+				<Text id="Title" key="{Salvager}" dimensions="top:0; left:0; width:100%; height:38" style="font:Demi_15;" class= "PanelTitle" />
+			
+				<ListLayout id="InventoryCategories" dimensions="left:0; top:46; width:170; height:100%;" style="vpadding:2;">
+	
+				</ListLayout>
+				
+				<StillArt id = "InventoryFiltersBG" dimensions="left:0; top:230; width:170; height:200;" class="Backplate" style="alpha:0.8"/>
+				<ListLayout id="InventoryFilters" dimensions="left:0; top:230; width:170; height:100%;" style="vpadding:2;">
+	
+				</ListLayout>
+			
+				<Group dimensions="right:100%-410; top:47; bottom:100%; width:400">
+					<StillArt dimensions="top:0; left:0; width:100%; height:40" class="Backplate"/>
+					<Text id="InventoryTitle" key="{Inventory}" dimensions="top:0; left:0; width:100%; height:40" style="font:Demi_12; halign:left; valign:center" class= "PanelTitle" />
+					
+					<Group dimensions="left:100; top:4; width:170; height:32" style="">
+							<Border dimensions="dock:fill" class="BlueBackDrop"  style="alpha:0.5; padding:5;" />
+							<Border dimensions="height:100%-4; width:100%-4;" class="SolidBackDrop" />
+							<TextInput id="SearchInput" dimensions="dock:fill" class="Chat, #TextInput" style="alpha:1.0; valign:center; wrap:false; maxlen:256; texture:colors; region:transparent;">
+								<Events>
+									<OnTextChange bind="OnSearchInput"/>
+									<OnSubmit 	  bind="OnSearchSubmit"/>
+								</Events>
+							</TextInput>
+						</Group>
+						
+					
+					<Choice id="SortChoice" dimensions="top:4; left:280; right:100%-4; height:32;"/>
+					
+					<StillArt dimensions="width:100%; top:50; bottom:100%-50;" class="Backplate"/>
+					<Group id="ItemList" dimensions="width:100%; top:50; bottom:100%-50;" style="alpha:1.0"/>		
+
+					<Group id="AddAllToQueue" dimensions="width:100%; center-x:50%; top:100%-40; bottom:100%;"></Group>
+					
+				</Group>
+				<Group dimensions="right: 100%; top:47; bottom:100%; width:400">
+				
+					<StillArt dimensions="top:0; left:0; width:100%; height:40" class="Backplate"/>
+					<Text id="QueueTitle" key="{Salvage Queue}" dimensions="top:0; left:0; width:100%; height:40" style="font:Demi_12;" class= "PanelTitle" />
+				
+					<StillArt dimensions="width:100%; top:50; bottom:100%-150;" class="Backplate"/>
+					<Group id="QueuedItems" dimensions="width:100%; top:50; bottom:100%-150;" style="alpha:1.0"/>
+					
+					<StillArt dimensions="width:100%; top:100%-140; bottom:100%-50;" class="Backplate"/>
+					<Group id="RewardItems" dimensions="width:100%; top:100%-140; bottom:100%-50;" style="alpha:1.0"/>
+					
+					<Group id="ClearQueue" dimensions="width:30%; center-x:15%; top:100%-40; bottom:100%;"></Group>
+					<Group id="StartSalvage" dimensions="width:65%;  center-x:65%; top:100%-40; bottom:100%;"></Group>
+				</Group>
+			</Children>
+			<OnOpen bind="OnOpen"/>
+			<OnClose bind="OnClose"/>
+			<OnEscape bind="OnEscape"/>
+		</PanelFrame>
+	</Frames>
+
+</Component>
